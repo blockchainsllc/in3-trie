@@ -1,5 +1,7 @@
 # in3-trie
-Implementation of the patricia merkle tree
+Implementation of the patricia merkle tree in typescript.
+This also includes Merkle proofs.
+
 
 ## Usage
 
@@ -32,4 +34,5 @@ verifyProof(trie.root, path, proof, expectedValue)
 
 ```
 
-
+Per default sha256 as hash and rlp-encoding is used to serilialize nodes, but you can configure your own hash and codec.
+Also by configuring a db, you can also use the leveldb to work with.
