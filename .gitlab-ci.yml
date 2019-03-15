@@ -20,6 +20,7 @@ build:
   script:
     - sh /prepare.sh
     - npm install
+    - npm install in3
     - npm run build
   artifacts:
     paths:
@@ -28,7 +29,7 @@ build:
 test-trie:
   stage: test
   tags:
-    -short-jobs
+    - short-jobs
   script:
     - sh /prepare.sh
     - npm install
