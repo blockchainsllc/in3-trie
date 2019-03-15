@@ -2,10 +2,10 @@
   "name": "in3-trie",
   "version": "0.1.0",
   "description": "a implementation of the patricia merkle tree",
-  "main": "js/index.js",
+  "main": "js/src/index.js",
   "scripts": {
     "build": "tsc -p .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tsc -p . && mocha ./js/test/txTrieTests.js"
   },
   "author": "Simon Jentzsch",
   "license": "in3",
@@ -14,6 +14,9 @@
     "@types/node": "^10.12.5"
   },
   "dependencies": {
-    "ethereumjs-util": "^6.0.0"
+    "@types/mocha": "^5.2.6",
+    "chai": "^4.2.0",
+    "ethereumjs-util": "^6.0.0",
+    "mocha": "^6.0.2"
   }
 }
