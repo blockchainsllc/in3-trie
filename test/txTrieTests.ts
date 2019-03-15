@@ -96,13 +96,13 @@ describe('Transaction Trie Tests', async () => {
     }, "Error: Key does not match with the proof one (extention|leaf)")
   })
 
-  it('Negative index transaction proofs', async () => {
-    const txIndex = -1
-    //index+1 because youare generating a incorrect proof or proof for the next transaction and not the current one
-    const proof = await trie.getProof(rlp.encode(txIndex))
-
-    await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex), proof, null)
-  })
+  // it('Negative index transaction proofs', async () => {
+  //   const txIndex = -1
+  //   //index+1 because youare generating a incorrect proof or proof for the next transaction and not the current one
+  //   const proof = await trie.getProof(rlp.encode(txIndex))
+  //
+  //   await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex), proof, null)
+  // })
 
   // it('Single node tx trie proofs', async() => {
   //
