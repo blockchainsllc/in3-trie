@@ -4,8 +4,10 @@ import 'mocha'
 import * as fs from 'fs'
 import in3_trie from '../src/index'
 import {rlp, keccak, toBuffer, setLengthLeft, bufferToInt} from 'ethereumjs-util'
-import { serialize } from 'in3'
+import { serialize, util } from 'in3'
 import verifyMerkleProof from '../src/proof'
+
+const toHex = util.toHex
 
 describe('Transaction Trie Tests', async () => {
 
@@ -33,11 +35,11 @@ describe('Transaction Trie Tests', async () => {
     const serializedTx = serialize.createTx(block.transactions[txIndex]).serialize()
 
     //index+1 because youare generating a incorrect proof or proof for the next transaction and not the current one
-    const proof = await trie.getProof(rlp.encode(txIndex + 1))
+    const proof = await trie.getProof(rlp.encode(randomIndex(txIndex + 1, block.transactions.length*20)))
 
     await assertThrowsAsynchronously( async() => {
       return await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex),proof, serializedTx)
-    }, "Bad proof node")
+    }, "Error: Bad proof node")
   })
 
   it('Wrong expected value against proof of transaction existence', async () => {
@@ -47,7 +49,7 @@ describe('Transaction Trie Tests', async () => {
 
     await assertThrowsAsynchronously( async() => {
       return await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex), proof, serializedTx)
-    }, " The proven value was expected to be")
+    }, "Error: The proven value was expected to be")
   })
 
   it('Proof of transaction non-existence', async () => {
@@ -58,19 +60,19 @@ describe('Transaction Trie Tests', async () => {
     await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex), proof, null)
   })
 
-  it('Incorrect proof of transaction non-existence', async () => {
+  it('Incorrect proof of transaction non-existence using in bounds index', async () => {
     //txIndex is out of bounds
     const txIndex = randomIndex(block.transactions.length, block.transactions.length*2)
 
-    //index+1 because youare generating a incorrect proof or proof for the next transaction and not the current one
-    const proof = await trie.getProof(rlp.encode(txIndex+1))
+
+    const proof = await trie.getProof(rlp.encode(txIndex - block.transactions.length))
 
     await assertThrowsAsynchronously( async () => {
       return await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex), proof, null)
-    }, "Bad proof node")
+    }, "Error: Bad proof node")
   })
 
-  it('Wrong expected value against proof of transaction existence', async () => {
+  it('Wrong expected value against proof of transaction non-existence', async () => {
     //txIndex is out of bounds
     const txIndex = randomIndex(block.transactions.length, block.transactions.length*2)
     const serializedTx = serialize.createTx(block.transactions[txIndex-block.transactions.length]).serialize()
@@ -79,10 +81,10 @@ describe('Transaction Trie Tests', async () => {
 
     await assertThrowsAsynchronously( async () => {
       await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex), proof, serializedTx)
-    }, " The proven value was expected to be")
+    }, "Error: Key does not match with the proof one (extention|leaf)")
   })
 
-  it('Wrong expected value(undefined) against proof of transaction existence', async () => {
+  it('Wrong expected value(undefined) against proof of transaction non-existence', async () => {
     //txIndex is out of bounds
     const txIndex = randomIndex(block.transactions.length, block.transactions.length*2)
 
@@ -91,12 +93,11 @@ describe('Transaction Trie Tests', async () => {
 
     await assertThrowsAsynchronously( async () => {
       return await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex), proof, undefined)
-    }, " The proven value was expected to be")
+    }, "Error: Key does not match with the proof one (extention|leaf)")
   })
 
   it('Negative index transaction proofs', async () => {
     const txIndex = -1
-
     //index+1 because youare generating a incorrect proof or proof for the next transaction and not the current one
     const proof = await trie.getProof(rlp.encode(txIndex))
 
@@ -117,12 +118,11 @@ async function assertThrowsAsynchronously(test, error?: string) {
     try {
         await test();
     } catch(e) {
+        console.log(e.toString())
         if (!error)
           return true
-        else if (e.message.startsWith(error))
+        else if (e.toString().startsWith(error))
           return true
-        else
-          throw new AssertionError("Missing rejection" + (error ? " with Error: "+error : ""));
     }
     throw new AssertionError("Missing rejection" + (error ? " with "+error : ""));
 }
