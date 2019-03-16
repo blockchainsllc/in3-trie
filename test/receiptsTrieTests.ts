@@ -80,38 +80,17 @@ describe('Receipts Trie Tests', async () => {
 
   it('Wrong expected value against proof of transaction receipt non-existence', async () => {
     //txIndex is out of bounds
-    const txIndex = randomIndex(block.receipts.length, block.receipts.length*2)
-    const rx = block.receipts[txIndex-block.receipts.length]
+    const txIndex = block.receipts.length + 10
+
+    const rx = block.receipts[0]
     const serializedRx = serialize.serialize(serialize.toReceipt(rx))
 
     const proof = await trie.getProof(rlp.encode(txIndex))
 
     await assertThrowsAsynchronously( async () => {
       await verifyMerkleProof(toBuffer(block.receiptsRoot), rlp.encode(txIndex), proof, serializedRx)
-    }, "Error: Key does not match with the proof one (extention|leaf)")
+    }, "Error: The proven value was expected to be")
   })
-
-  it('Wrong expected value(undefined) against proof of transaction receipt non-existence', async () => {
-    //txIndex is out of bounds
-    const txIndex = randomIndex(block.receipts.length, block.receipts.length*2)
-    const proof = await trie.getProof(rlp.encode(txIndex))
-
-    await assertThrowsAsynchronously( async () => {
-      return await verifyMerkleProof(toBuffer(block.receiptsRoot), rlp.encode(txIndex), proof, undefined)
-    }, "Error: Key does not match with the proof one (extention|leaf)")
-  })
-
-  // it('Negative index transaction proofs', async () => {
-  //   const txIndex = -1
-  //   //index+1 because youare generating a incorrect proof or proof for the next transaction and not the current one
-  //   const proof = await trie.getProof(rlp.encode(txIndex))
-  //
-  //   await verifyMerkleProof(toBuffer(block.receiptsRoot), rlp.encode(txIndex), proof, null)
-  // })
-
-  // it('Single node tx trie proofs', async() => {
-  //
-  // })
 
 })
 

@@ -12,7 +12,10 @@ const toHex = util.toHex
 describe('Transaction Trie Tests', async () => {
 
   const trie = new in3_trie()
+  const single_trie = new in3_trie()
+
   const block = JSON.parse(fs.readFileSync('./test/block.json', 'utf8').toString())
+  const singleTxBlock = JSON.parse(fs.readFileSync('./test/singleTxBlock.json', 'utf8').toString())
 
   it('Construct a merkle tree', async() => {
     for(const tx of block.transactions){
@@ -20,6 +23,12 @@ describe('Transaction Trie Tests', async () => {
     }
 
     assert.equal(block.transactionsRoot,'0x' + trie.root.toString('hex'))
+
+    for(const tx of singleTxBlock.transactions){
+      await single_trie.setValue(rlp.encode(tx.transactionIndex), serialize.createTx(tx).serialize())
+    }
+
+    assert.equal(singleTxBlock.transactionsRoot,'0x' + single_trie.root.toString('hex'))
   })
 
   it('Proof of transaction existence', async () => {
@@ -43,8 +52,8 @@ describe('Transaction Trie Tests', async () => {
   })
 
   it('Wrong expected value against proof of transaction existence', async () => {
-    const txIndex = randomIndex(0, block.transactions.length)
-    const serializedTx = serialize.createTx(block.transactions[txIndex+1]).serialize()
+    const txIndex = 0
+    const serializedTx = serialize.createTx(block.transactions[1]).serialize()
     const proof = await trie.getProof(rlp.encode(txIndex))
 
     await assertThrowsAsynchronously( async() => {
@@ -74,39 +83,41 @@ describe('Transaction Trie Tests', async () => {
 
   it('Wrong expected value against proof of transaction non-existence', async () => {
     //txIndex is out of bounds
-    const txIndex = randomIndex(block.transactions.length, block.transactions.length*2)
-    const serializedTx = serialize.createTx(block.transactions[txIndex-block.transactions.length]).serialize()
-    //index+1 because youare generating a incorrect proof or proof for the next transaction and not the current one
+    const txIndex = block.transactions.length + 10
+    const serializedTx = serialize.createTx(block.transactions[0]).serialize()
+
     const proof = await trie.getProof(rlp.encode(txIndex))
 
     await assertThrowsAsynchronously( async () => {
       await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex), proof, serializedTx)
-    }, "Error: Key does not match with the proof one (extention|leaf)")
+    }, "Error: The proven value was expected to be")
   })
 
-  it('Wrong expected value(undefined) against proof of transaction non-existence', async () => {
-    //txIndex is out of bounds
-    const txIndex = randomIndex(block.transactions.length, block.transactions.length*2)
+  it('Single transaction trie - proof of existence', async() => {
+    const serializedTx = serialize.createTx(singleTxBlock.transactions[0]).serialize()
+    const proof = await single_trie.getProof(rlp.encode(0))
 
-    //index+1 because youare generating a incorrect proof or proof for the next transaction and not the current one
-    const proof = await trie.getProof(rlp.encode(txIndex))
-
-    await assertThrowsAsynchronously( async () => {
-      return await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex), proof, undefined)
-    }, "Error: Key does not match with the proof one (extention|leaf)")
+    await verifyMerkleProof(toBuffer(singleTxBlock.transactionsRoot), rlp.encode(0), proof, serializedTx)
   })
 
-  // it('Negative index transaction proofs', async () => {
-  //   const txIndex = -1
-  //   //index+1 because youare generating a incorrect proof or proof for the next transaction and not the current one
-  //   const proof = await trie.getProof(rlp.encode(txIndex))
-  //
-  //   await verifyMerkleProof(toBuffer(block.transactionsRoot), rlp.encode(txIndex), proof, null)
-  // })
+  it('Single transaction trie - proof of non-existence', async() => {
+    const proof = await single_trie.getProof(rlp.encode(2))
 
-  // it('Single node tx trie proofs', async() => {
-  //
-  // })
+    await verifyMerkleProof(toBuffer(singleTxBlock.transactionsRoot), rlp.encode(2), proof, null)
+  })
+
+  it('Single transaction trie - incorrect proofs for existence will pass', async() => {
+    const proof = await single_trie.getProof(rlp.encode(1))
+    const serializedTx = serialize.createTx(singleTxBlock.transactions[0]).serialize()
+
+    return await verifyMerkleProof(toBuffer(singleTxBlock.transactionsRoot), rlp.encode(0), proof, serializedTx)
+  })
+
+  it('Single transaction trie - incorrect proofs for non-existence will pass', async() => {
+    const proof = await single_trie.getProof(rlp.encode(0))
+
+    await verifyMerkleProof(toBuffer(singleTxBlock.transactionsRoot), rlp.encode(1), proof, null)
+  })
 
 })
 
