@@ -5,7 +5,7 @@
   "main": "js/src/index.js",
   "scripts": {
     "build": "tsc -p .",
-    "test": "tsc -p . && mocha ./js/test/txTrieTests.js"
+    "test": "tsc -p . && mocha ./js/test/*.js"
   },
   "author": "Simon Jentzsch",
   "license": "in3",

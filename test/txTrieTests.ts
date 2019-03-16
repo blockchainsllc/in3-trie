@@ -118,7 +118,6 @@ async function assertThrowsAsynchronously(test, error?: string) {
     try {
         await test();
     } catch(e) {
-        console.log(e.toString())
         if (!error)
           return true
         else if (e.toString().startsWith(error))
