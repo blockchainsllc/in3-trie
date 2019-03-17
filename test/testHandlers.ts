@@ -41,7 +41,7 @@ export async function populateTree(testCase: TestCase): Promise<in3_trie>{
       await trie.setValue(toBuffer(key), toBuffer(inputs[key]))
     }
   }
-
+  console.log(await trie.dump())
   return trie
 }
 

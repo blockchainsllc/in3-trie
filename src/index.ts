@@ -40,7 +40,7 @@ export default class Trie {
 
   /**
    * sets a value in the db.
-   * @param key sets a value in 
+   * @param key sets a value in
    * @param value the value to set
    */
   public async setValue( key:Buffer, value:Buffer ):Promise<NodeKey> {
@@ -50,6 +50,7 @@ export default class Trie {
     const handleNode = async ( curNode: TrieNode, path:Nibbles )=> {
       if (!curNode)
          return  await this.updateDB(TrieNode.createLeaf(path,value), path.length==key.length*2)
+
       if (path.length==0) {
         switch (curNode.type) {
           case NodeType.Branch:
@@ -90,43 +91,46 @@ export default class Trie {
       else {
         switch (curNode.type) {
           case NodeType.Branch:
-             const first = path[0]
-             if (curNode.data[first].equals(EMPTY)) 
-               // we can simply add a leaf here
-               curNode.data[first] = await this.updateDB(TrieNode.createLeaf(path.slice(1),value)) as Buffer
-             else 
-               // handle the next node
-               curNode.data[first] = await handleNode(await this.getNode(curNode.data[first]),path.slice(1)) as Buffer
-             break
+            const first = path[0]
+            if (curNode.data[first] === EMPTY)
+              // we can simply add a leaf here
+              curNode.data[first] = await this.updateDB(TrieNode.createLeaf(path.slice(1),value)) as Buffer
+            else
+              // handle the next node
+              curNode.data[first] = await handleNode(await this.getNode(curNode.data[first]),path.slice(1)) as Buffer
+            break
           case NodeType.Extension:
           case NodeType.Leaf:
             const nextPath = curNode.path
             const matching = matchingNibbles( path ,nextPath)
-            if (matching === nextPath.length) { // next element fits so we can update next node 
-              if (curNode.type===NodeType.Leaf)
+
+            if ((matching) === path.length && curNode.type===NodeType.Leaf && matching === nextPath.length) // next element fits so we can update next node
                 // for Leaf: we simply replace the leaf-value
                 curNode.data[1] = value
-              else
+            else if(matching === nextPath.length && curNode.type===NodeType.Extension)
                 // for Extension: we follow the path
                 curNode.data[1] = await handleNode(await this.getNode(curNode.data[1]),path.slice(nextPath.length)) as Buffer
-            }
             else { // does not fit, so we need rebuild the trie
               // create the branch
               const branch = TrieNode.createBranch()
               curNode.path = nextPath.slice(matching+1)
               const restPath = path.slice(matching)
-              if (restPath.length===0)
-                  branch.data[16]=value
+
+              if(nextPath.length === matching || nextPath.length === 0)
+                branch.data[16] = curNode.value
+
+              if (restPath.length===0 && nextPath.length != 0)
+                branch.data[16]=value
               else
-                  branch.data[restPath[0]] = await this.updateDB(TrieNode.createLeaf(restPath.slice(1),value)) as Buffer
+                branch.data[restPath[0]] = await this.updateDB(TrieNode.createLeaf(restPath.slice(1),value)) as Buffer
               branch.data[nextPath[matching]] = nextPath.length===matching+1 && curNode.type == NodeType.Extension ? curNode.target : await this.updateDB(curNode) as Buffer
-  
+
               // use the new current node
               curNode = matching>0 ? TrieNode.createExt(nextPath.slice(0,matching), await this.updateDB(branch)) : branch
             }
         }
       }
-  
+
       // store the changed node in the db and return the hash (or node.data if rawValue is less than 32byte)
       return this.updateDB(curNode, path.length==key.length*2)
     }
@@ -155,9 +159,9 @@ export default class Trie {
         case NodeType.Leaf:
            const nextPath = curNode.path
            if ( matchingNibbles(nextPath, path)<nextPath.length )
-              return undefined  
+              return undefined
            if ( curNode.type === NodeType.Leaf) return curNode.value
-           return await handleNode( await this.getNode(curNode.target),path.slice(nextPath.length)) 
+           return await handleNode( await this.getNode(curNode.target),path.slice(nextPath.length))
       }
     }
     debugger
@@ -174,7 +178,7 @@ export default class Trie {
 
   /**
    * creates a MerkleProof for the given value.
-   * @param key 
+   * @param key
    */
   public async getProof(key:Buffer):Promise<Buffer[]> {
     const proof=[]
@@ -197,7 +201,7 @@ export default class Trie {
       switch (node.type) {
         case NodeType.Branch:
           r+='<B> '
-          if (!node.value.equals(EMPTY)) r+=' = 0x'+node.value.toString('hex')
+          if (!(node.value === EMPTY)) r+=' = 0x'+node.value.toString('hex')
           const lastIndex =  node.data.reduce((p,n,i)=>i>15 || !n.length ? p : i,-1)
 
           for (let i=0;i<16;i++)
@@ -255,26 +259,26 @@ export function toNibbles(path:Buffer, usePrefix=false):Nibbles {
     res[i*2+1]=val & 15
   })
 
-  if (usePrefix) 
+  if (usePrefix)
     res.splice(0,2-(res[0] & 1) )
   return res
 }
 
 /**
  * returns the number of nibbles matching starting at the beginning.
- * @param a 
- * @param b 
+ * @param a
+ * @param b
  */
 export function matchingNibbles(a:Nibbles, b:Nibbles) {
   const maxLen = Math.min(a.length,b.length)
   for (let i=0;i<maxLen;i++) {
-     if (a[i]!==b[i]) return i 
+     if (a[i]!==b[i]) return i
   }
   return maxLen
 }
 
-export const verifyProof = verify 
-export const createProofVerifier = createVerifier 
+export const verifyProof = verify
+export const createProofVerifier = createVerifier
 
 const hex = '0123456789abcdef'
 
@@ -298,8 +302,8 @@ export class TrieNode {
 
   /**
    * creates a Node from the raw data
-   * @param data 
-   * @param codec 
+   * @param data
+   * @param codec
    */
   static fromRaw(data:Buffer, codec:Codec):TrieNode {
     return new TrieNode(codec.decode(data))
@@ -309,8 +313,8 @@ export class TrieNode {
 
   /**
    * creates a Leaf-Node
-   * @param path 
-   * @param value 
+   * @param path
+   * @param value
    */
   static createLeaf(path:Nibbles, value:Buffer) {
     const node = new TrieNode([Buffer.from('20','hex'),value])
@@ -371,5 +375,3 @@ export class TrieNode {
   }
 
 }
-
-
