@@ -4,8 +4,8 @@
   "description": "a implementation of the patricia merkle tree",
   "main": "js/src/index.js",
   "scripts": {
-    "build": "tsc -p .",
-    "test": "tsc -p . && cp ./test/block.json ./js/test/block.json && cp ./test/singleTxBlock.json ./js/test/singleTxBlock.json && mocha ./js/test/*.js"
+    "build": "rm -rf js && tsc -p .",
+    "test": "npm run build && cp -rf ./test/testdata ./js/test/testdata && mocha ./js/test/*.js"
   },
   "author": "Simon Jentzsch",
   "license": "in3",

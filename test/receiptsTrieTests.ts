@@ -1,20 +1,12 @@
-import {assert} from 'chai'
-const AssertionError = require('assertion-error')
 import 'mocha'
-import * as fs from 'fs'
-import in3_trie from '../src/index'
-import {rlp, keccak, toBuffer, setLengthLeft, bufferToInt} from 'ethereumjs-util'
-import { serialize, util, BlockData, ReceiptData } from 'in3'
+import {assert} from 'chai'
+import { assertThrowsAsynchronously, populateReceiptTree, serializeReceipts} from "./testHandlers"
+
 import verifyMerkleProof from '../src/proof'
-
-const toHex = util.toHex
-
-interface NewBlockData extends BlockData {
-  receipts: ReceiptData[]
-}
+import {rlp, keccak, toBuffer, setLengthLeft, bufferToInt} from 'ethereumjs-util'
 
 describe('Receipts Trie Tests', async () => {
-  const block = require('./block.json')
+  const block = require('./testdata/block.json')
 
   it('Construct a merkle tree', async() => {
 
@@ -30,7 +22,7 @@ describe('Receipts Trie Tests', async () => {
     const txIndices = [0, block.receipts.length-1, 16, 32, 64]
 
     for(const index of txIndices){
-      const serializedRx = serialize.serialize(serialize.toReceipt(block.receipts[index]))
+      const serializedRx = serializeReceipts(block.receipts[index])
       const proof = await trie.getProof(rlp.encode(index))
 
       await verifyMerkleProof(toBuffer(block.receiptsRoot), rlp.encode(index), proof, serializedRx)
@@ -43,7 +35,7 @@ describe('Receipts Trie Tests', async () => {
     const trie = await populateReceiptTree(block)
 
     const txIndex = 2
-    const serializedRx = serialize.serialize(serialize.toReceipt(block.receipts[txIndex]))
+    const serializedRx = serializeReceipts(block.receipts[txIndex])
 
     const maniProof = await trie.getProof(rlp.encode(2))
     const temp_proof = await trie.getProof(rlp.encode(64))
@@ -71,7 +63,7 @@ describe('Receipts Trie Tests', async () => {
     const trie = await populateReceiptTree(block)
 
     const txIndex = 0
-    const serializedRx = serialize.serialize(serialize.toReceipt(block.receipts[1]))
+    const serializedRx = serializeReceipts(block.receipts[1])
 
     const proof = await trie.getProof(rlp.encode(txIndex))
 
@@ -124,7 +116,7 @@ describe('Receipts Trie Tests', async () => {
 
     //txIndex is out of bounds
     const txIndex = block.receipts.length + 10
-    const serializedRx = serialize.serialize(serialize.toReceipt(block.receipts[0]))
+    const serializedRx = serializeReceipts(block.receipts[0])
 
     const proof = await trie.getProof(rlp.encode(txIndex))
 
@@ -135,29 +127,3 @@ describe('Receipts Trie Tests', async () => {
   })
 
 })
-
-async function assertThrowsAsynchronously(test, error?: string) {
-    try {
-        await test();
-    } catch(e) {
-        if (!error)
-          return true
-        else if (e.toString().startsWith(error))
-          return true
-    }
-    throw new AssertionError("Missing rejection" + (error ? " with "+error : ""));
-}
-
-async function populateReceiptTree(block: NewBlockData): Promise<in3_trie>{
-
-  const trie = new in3_trie()
-
-  for(const r of block.receipts){
-    if(typeof r.status != "string") r.status = r.status?"0x1":"0x0"
-    if(typeof r.cumulativeGasUsed != "string") r.cumulativeGasUsed = toHex(r.cumulativeGasUsed)
-
-    await trie.setValue(rlp.encode(r.transactionIndex), serialize.serialize(serialize.toReceipt(r)))
-  }
-
-  return trie
-}
