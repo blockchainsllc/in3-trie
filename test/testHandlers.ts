@@ -1,5 +1,5 @@
 import { serialize, util, BlockData, ReceiptData, TransactionData} from 'in3'
-import { sha3, rlp, toBuffer } from 'ethereumjs-util'
+import { keccak256, rlp, toBuffer } from 'ethereumjs-util'
 import in3_trie from '../src/index'
 
 const AssertionError = require('assertion-error')
@@ -30,18 +30,18 @@ export async function populateTree(testCase: TestCase): Promise<in3_trie>{
   const trie = new in3_trie()
 
   const inputs = testCase["in"]
+  const secure = testCase["secure"]?true:false
 
   if(inputs[0]) {
     for(const pair of inputs){
-      await trie.setValue(toBuffer(pair[0]), toBuffer(pair[1]))
+      await trie.setValue(secure?keccak256(pair[0]):toBuffer(pair[0]), toBuffer(pair[1]))
     }
   }
   else {
     for(const key in inputs) {
-      await trie.setValue(toBuffer(key), toBuffer(inputs[key]))
+      await trie.setValue(secure?keccak256(key):toBuffer(key), toBuffer(inputs[key]))
     }
   }
-  console.log(await trie.dump())
   return trie
 }
 

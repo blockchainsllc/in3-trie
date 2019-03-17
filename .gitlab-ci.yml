@@ -26,15 +26,15 @@ build:
     paths:
       - js/
 
-# test-trie:
-#   stage: test
-#   tags:
-#     - short-jobs
-#   script:
-#     - sh /prepare.sh
-#     - npm install
-#     - npm install in3
-#     - npm test
+test-trie:
+  stage: test
+  tags:
+    - short-jobs
+  script:
+    - sh /prepare.sh
+    - npm install
+    - npm install in3
+    - npm test
 
 deploy-to-slockit-npm:
   stage: deploy

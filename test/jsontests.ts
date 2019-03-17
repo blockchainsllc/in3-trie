@@ -5,7 +5,7 @@ import { populateTree } from './testHandlers'
 import { toBuffer } from 'ethereumjs-util'
 
 const testDir = 'test/testdata'
-const ignoreFiles = ["block.json", "singleTxBlock.json", "trietestnextprev.json", 'hex_encoded_securetrie_test.json', "trieanyorder_secureTrie.json", "trietest_secureTrie.json"]
+const ignoreFiles = ["block.json", "singleTxBlock.json", 'trietest_removed.json', 'trietest_secureTrie.json', 'trietestnextprev.json']
 
 describe('JSON-Tests', () => {
   for (const f of readdirSync(testDir)) {
@@ -18,7 +18,6 @@ describe('JSON-Tests', () => {
         Object.keys(test).forEach(testcase => {
           it(testcase, async() => {
             const trie = await populateTree(test[testcase])
-            console.log(test[testcase].root, trie.root.toString('hex'))
             assert.isTrue(toBuffer(test[testcase].root).equals(trie.root))
           })
         })
