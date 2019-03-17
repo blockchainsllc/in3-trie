@@ -1,11 +1,17 @@
 import { serialize, util, BlockData, ReceiptData, TransactionData} from 'in3'
-import { rlp } from 'ethereumjs-util'
+import { sha3, rlp, toBuffer } from 'ethereumjs-util'
 import in3_trie from '../src/index'
 
 const AssertionError = require('assertion-error')
 
 interface NewBlockData extends BlockData {
   receipts: ReceiptData[]
+}
+
+interface TestCase {
+  in: any,
+  root: string,
+  hexEncoded?: boolean
 }
 
 export async function assertThrowsAsynchronously(test, error?: string) {
@@ -18,6 +24,25 @@ export async function assertThrowsAsynchronously(test, error?: string) {
           return true
     }
     throw new AssertionError("Missing rejection" + (error ? " with "+error : ""));
+}
+
+export async function populateTree(testCase: TestCase): Promise<in3_trie>{
+  const trie = new in3_trie()
+
+  const inputs = testCase["in"]
+
+  if(inputs[0]) {
+    for(const pair of inputs){
+      await trie.setValue(toBuffer(pair[0]), toBuffer(pair[1]))
+    }
+  }
+  else {
+    for(const key in inputs) {
+      await trie.setValue(toBuffer(key), toBuffer(inputs[key]))
+    }
+  }
+
+  return trie
 }
 
 export async function populateTransactionTree(block: BlockData): Promise<in3_trie>{
