@@ -14,7 +14,7 @@ interface NewBlockData extends BlockData {
 }
 
 describe('Receipts Trie Tests', async () => {
-  const block = JSON.parse(fs.readFileSync('./test/block.json', 'utf8').toString())
+  const block = require('./block.json')
 
   it('Construct a merkle tree', async() => {
 
@@ -135,10 +135,6 @@ describe('Receipts Trie Tests', async () => {
   })
 
 })
-
-function randomIndex(min: number, max: number) {
-  return Math.floor(Math.random() * (+max - +min)) + +min
-}
 
 async function assertThrowsAsynchronously(test, error?: string) {
     try {

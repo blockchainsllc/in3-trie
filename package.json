@@ -5,14 +5,14 @@
   "main": "js/src/index.js",
   "scripts": {
     "build": "tsc -p .",
-    "test": "tsc -p . && mocha ./js/test/*.js"
+    "test": "tsc -p . && cp ./test/block.json ./js/test/block.json && cp ./test/singleTxBlock.json ./js/test/singleTxBlock.json && mocha ./js/test/*.js"
   },
   "author": "Simon Jentzsch",
   "license": "in3",
   "devDependencies": {
-    "typescript": "^3.1.6",
-    "@types/node": "^10.12.5",
-    "@types/mocha": "^5.2.6"
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^10.14.1",
+    "typescript": "^3.3.3333"
   },
   "dependencies": {
     "chai": "^4.2.0",
