@@ -92,12 +92,14 @@ export default class Trie {
         switch (curNode.type) {
           case NodeType.Branch:
             const first = path[0]
-            if (curNode.data[first] == EMPTY)
-              // we can simply add a leaf here
-              curNode.data[first] = await this.updateDB(TrieNode.createLeaf(path.slice(1),value)) as Buffer
-            else
-              // handle the next node
-              curNode.data[first] = await handleNode(await this.getNode(curNode.data[first]),path.slice(1)) as Buffer
+
+              if (Buffer.isBuffer(curNode.data[first]) && curNode.data[first].equals(EMPTY))
+                // we can simply add a leaf here
+                curNode.data[first] = await this.updateDB(TrieNode.createLeaf(path.slice(1),value)) as Buffer
+              else
+                // handle the next node
+                curNode.data[first] = await handleNode(await this.getNode(curNode.data[first]),path.slice(1)) as Buffer
+
             break
           case NodeType.Extension:
           case NodeType.Leaf:
