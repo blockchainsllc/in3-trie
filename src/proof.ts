@@ -32,7 +32,7 @@ export function createVerifier(config?:{codec:Codec, hasher:Hasher}, errorMsg?: 
  * @param proof the serialized nodes
  * @param expectedValue expected value, if null, this function verifies for non existing node.
  * @param errorMsg the error message that should be used in case of not verifiable.
- * 
+ *
  * The function will return the value of the last node if it was successfull or throw otherwise.
  */
 export default function verify(rootHash: Buffer, path: Buffer, proof: Buffer[], expectedValue: Buffer, conf?:{codec:Codec, hasher:Hasher}, errorMsg?: string) {
@@ -66,7 +66,7 @@ export default function verify(rootHash: Buffer, path: Buffer, proof: Buffer[], 
   debugger
 
   // if we don't expect a value
-  if (expectedValue === null) 
+  if (expectedValue === null)
     return null
   else if (expectedValue === undefined)
     return lastNode.value
@@ -75,7 +75,7 @@ export default function verify(rootHash: Buffer, path: Buffer, proof: Buffer[], 
 
   // if we expected this to be null and there is not further node since wantedHash is empty or we had a extension as last element, than it is ok not to find leafs
   else if (expectedValue && (!lastNode || !lastNode.value || expectedValue.compare(lastNode.value)))
-    throw new Error(errorPrefix + ' The proven value was expected to be ' + expectedValue.toString('hex') + ' but is ' + (lastNode && lastNode.value && lastNode.value.toString('hex')))
+    throw new Error(errorPrefix + 'The proven value was expected to be ' + expectedValue.toString('hex') + ' but is ' + (lastNode && lastNode.value && lastNode.value.toString('hex')))
 
   // we reached the end of the proof, but not of the path
   throw new Error('Unexpected end of proof')
@@ -102,11 +102,11 @@ function checkNode(node:TrieNode, key:Nibbles, expectedValue:Buffer, errorPrefix
 
       // find the childHash
       const childHash = node.data[key[0]]
-      
+
       // remove the first item
       key.splice(0, 1)
 
-      if ( Array.isArray(childHash)) 
+      if ( Array.isArray(childHash))
         return checkNode(new TrieNode(childHash as any),key,expectedValue,errorPrefix,isLastNode)
       else
         return [node, childHash]
@@ -138,11 +138,11 @@ function checkNode(node:TrieNode, key:Nibbles, expectedValue:Buffer, errorPrefix
 
         // if we are proven a value which shouldn't exist this must throw an error
         if (expectedValue === null && node.type===NodeType.Leaf)
-          throw new Error(errorPrefix + ' The value shouldn\'t exist, but is ' + val.toString('hex'))
+          throw new Error(errorPrefix + 'The value shouldn\'t exist, but is ' + val.toString('hex'))
 
       }
       else if (node.type===NodeType.Leaf && expectedValue!==null)
-        throw new Error(errorPrefix + ' Leaf value should not exist here!')
+        throw new Error(errorPrefix + 'Leaf value should not exist here!')
       return [node, node.target]
   }
 }
