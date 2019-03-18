@@ -10,7 +10,8 @@
       ["dog", "puppy"],
       ["shaman", null]
     ],
-    "root": "0x29b235a58c3c25ab83010c327d5932bcf05324b7d6b1185e650798034783ca9d"
+    "root": "0x29b235a58c3c25ab83010c327d5932bcf05324b7d6b1185e650798034783ca9d",
+    "secure": true
   },
   "branchingTests": {
     "in":[
@@ -65,7 +66,8 @@
       ["0xd2571607e241ecf590ed94b12d87c94babe36db6", null],
       ["0xf735071cbee190d76b704ce68384fc21e389fbe7", null]
     ],
-    "root": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"
+    "root": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+    "secure": true
   },
   "jeff": {
     "in": [
@@ -81,6 +83,7 @@
       ["0x000000000000000000000000697c7b8c961b56f675d570498424ac8de1a918f6", "0x6f6f6f6820736f2067726561742c207265616c6c6c793f000000000000000000"],
       ["0x6f6f6f6820736f2067726561742c207265616c6c6c793f000000000000000000", "0x697c7b8c961b56f675d570498424ac8de1a918f6"]
     ],
-    "root": "0x72adb52e9d9428f808e3e8045be18d3baa77881d0cfab89a17a2bcbacee2f320"
+    "root": "0x72adb52e9d9428f808e3e8045be18d3baa77881d0cfab89a17a2bcbacee2f320",
+    "secure": true
   }
 }

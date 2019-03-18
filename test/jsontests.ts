@@ -5,7 +5,7 @@ import { populateTree } from './testHandlers'
 import { toBuffer } from 'ethereumjs-util'
 
 const testDir = 'test/testdata'
-const ignoreFiles = ["block.json", "singleTxBlock.json", 'trietest_removed.json', 'trietest_secureTrie.json', 'trietestnextprev.json']
+const ignoreFiles = ["block.json", "singleTxBlock.json", 'trietestnextprev.json']
 
 describe('JSON-Tests', () => {
   for (const f of readdirSync(testDir).filter(_ => !ignoreFiles.includes(_))) {
@@ -20,6 +20,6 @@ describe('JSON-Tests', () => {
           })
         })
       })
-  
+
   }
 })

@@ -23,11 +23,12 @@ export async function assertThrowsAsynchronously(test, error?: string) {
 export async function populateTree(testCase): Promise<in3_trie>{
   const trie = new in3_trie()
 
-  const inputs = testCase.in
+  let inputs = testCase.in
   const secure = testCase.secure?true:false
 
   if(inputs[0]) {
-    for(const pair of inputs){
+    const filteredInputs = removeDuplicates(inputs)
+    for(const pair of filteredInputs){
       await trie.setValue(secure?keccak256(pair[0]):toBuffer(pair[0]), toBuffer(pair[1]))
     }
   }
@@ -36,7 +37,20 @@ export async function populateTree(testCase): Promise<in3_trie>{
       await trie.setValue(secure?keccak256(key):toBuffer(key), toBuffer(inputs[key]))
     }
   }
+
   return trie
+}
+
+function removeDuplicates(inputs) {
+  let duplicates = []
+
+  inputs.forEach(element => {
+    if(element[1] === null) {
+      duplicates.push(element[0])
+    }
+  })
+
+  return inputs.filter(value => !duplicates.includes(value[0]))
 }
 
 export async function populateTransactionTree(block: BlockData): Promise<in3_trie>{
