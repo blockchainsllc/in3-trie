@@ -8,9 +8,7 @@ const testDir = 'test/testdata'
 const ignoreFiles = ["block.json", "singleTxBlock.json", 'trietest_removed.json', 'trietest_secureTrie.json', 'trietestnextprev.json']
 
 describe('JSON-Tests', () => {
-  for (const f of readdirSync(testDir)) {
-
-    if(!ignoreFiles.includes(f)){
+  for (const f of readdirSync(testDir).filter(_ => !ignoreFiles.includes(_))) {
 
       describe(f, () => {
         const test = require("./testdata/" + f)
@@ -21,9 +19,7 @@ describe('JSON-Tests', () => {
             assert.isTrue(toBuffer(test[testcase].root).equals(trie.root))
           })
         })
-
       })
-
-    }
+  
   }
 })

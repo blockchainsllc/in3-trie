@@ -23,8 +23,8 @@ export async function assertThrowsAsynchronously(test, error?: string) {
 export async function populateTree(testCase): Promise<in3_trie>{
   const trie = new in3_trie()
 
-  const inputs = testCase["in"]
-  const secure = testCase["secure"]?true:false
+  const inputs = testCase.in
+  const secure = testCase.secure?true:false
 
   if(inputs[0]) {
     for(const pair of inputs){

@@ -92,7 +92,7 @@ export default class Trie {
         switch (curNode.type) {
           case NodeType.Branch:
             const first = path[0]
-            if (curNode.data[first] === EMPTY)
+            if (curNode.data[first] == EMPTY)
               // we can simply add a leaf here
               curNode.data[first] = await this.updateDB(TrieNode.createLeaf(path.slice(1),value)) as Buffer
             else
@@ -104,7 +104,7 @@ export default class Trie {
             const nextPath = curNode.path
             const matching = matchingNibbles( path ,nextPath)
 
-            if ((matching) === path.length && curNode.type===NodeType.Leaf && matching === nextPath.length) // next element fits so we can update next node
+            if (matching === path.length && curNode.type === NodeType.Leaf && matching === nextPath.length) // next element fits so we can update next node
                 // for Leaf: we simply replace the leaf-value
                 curNode.data[1] = value
             else if(matching === nextPath.length && curNode.type===NodeType.Extension)
@@ -201,7 +201,7 @@ export default class Trie {
       switch (node.type) {
         case NodeType.Branch:
           r+='<B> '
-          if (!(node.value === EMPTY)) r+=' = 0x'+node.value.toString('hex')
+          if (!node.value.equals(EMPTY)) r+=' = 0x'+node.value.toString('hex')
           const lastIndex =  node.data.reduce((p,n,i)=>i>15 || !n.length ? p : i,-1)
 
           for (let i=0;i<16;i++)
