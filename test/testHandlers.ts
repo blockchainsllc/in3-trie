@@ -1,5 +1,5 @@
 import { serialize, util, BlockData, ReceiptData, TransactionData} from 'in3'
-import { rlp } from 'ethereumjs-util'
+import { keccak256, rlp, toBuffer } from 'ethereumjs-util'
 import in3_trie from '../src/index'
 
 const AssertionError = require('assertion-error')
@@ -18,6 +18,39 @@ export async function assertThrowsAsynchronously(test, error?: string) {
           return true
     }
     throw new AssertionError("Missing rejection" + (error ? " with "+error : ""));
+}
+
+export async function populateTree(testCase): Promise<in3_trie>{
+  const trie = new in3_trie()
+
+  let inputs = testCase.in
+  const secure = testCase.secure?true:false
+
+  if(inputs[0]) {
+    const filteredInputs = removeDuplicates(inputs)
+    for(const pair of filteredInputs){
+      await trie.setValue(secure?keccak256(pair[0]):toBuffer(pair[0]), toBuffer(pair[1]))
+    }
+  }
+  else {
+    for(const key in inputs) {
+      await trie.setValue(secure?keccak256(key):toBuffer(key), toBuffer(inputs[key]))
+    }
+  }
+
+  return trie
+}
+
+function removeDuplicates(inputs) {
+  let duplicates = []
+
+  inputs.forEach(element => {
+    if(element[1] === null) {
+      duplicates.push(element[0])
+    }
+  })
+
+  return inputs.filter(value => !duplicates.includes(value[0]))
 }
 
 export async function populateTransactionTree(block: BlockData): Promise<in3_trie>{
