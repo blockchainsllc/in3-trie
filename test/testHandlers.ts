@@ -8,12 +8,6 @@ interface NewBlockData extends BlockData {
   receipts: ReceiptData[]
 }
 
-interface TestCase {
-  in: any,
-  root: string,
-  hexEncoded?: boolean
-}
-
 export async function assertThrowsAsynchronously(test, error?: string) {
     try {
         await test();
@@ -26,7 +20,7 @@ export async function assertThrowsAsynchronously(test, error?: string) {
     throw new AssertionError("Missing rejection" + (error ? " with "+error : ""));
 }
 
-export async function populateTree(testCase: TestCase): Promise<in3_trie>{
+export async function populateTree(testCase): Promise<in3_trie>{
   const trie = new in3_trie()
 
   const inputs = testCase["in"]
