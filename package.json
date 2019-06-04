@@ -12,11 +12,12 @@
   "devDependencies": {
     "@types/mocha": "^5.2.6",
     "@types/node": "^10.14.1",
-    "typescript": "^3.3.3333"
+    "typescript": "^3.4.3",
+    "in3": "^1.1.29",
+    "chai": "^4.2.0",
+    "mocha": "^6.0.2"
   },
   "dependencies": {
-    "chai": "^4.2.0",
-    "ethereumjs-util": "^6.0.0",
-    "mocha": "^6.0.2"
+    "ethereumjs-util": "^6.0.0"
   }
 }
