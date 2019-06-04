@@ -7,6 +7,7 @@ const EMPTY = Buffer.allocUnsafe(0)
 export interface DB {
   getValue(key:Buffer):Promise<Buffer>
   setValue(key:Buffer, value:Buffer):Promise<void>
+  getAllEntries()
 }
 
 export type Hash = Buffer
@@ -31,7 +32,11 @@ export default class Trie {
   private codec:Codec
   public root:Hash
 
+  private defaultConfig:boolean
+
   constructor(root?:Buffer, config?: { hasher:Hasher, codec:Codec, db:DB } ) {
+    this.defaultConfig = config ? false : true
+
     this.db = config && config.db || new MemoryDB()
     this.hasher = config && config.hasher || keccak
     this.codec = config && config.codec || rlp
@@ -185,6 +190,37 @@ export default class Trie {
   public async getProof(key:Buffer):Promise<Buffer[]> {
     const proof=[]
     return this.getValue(key,proof).then(_=>proof)
+  }
+
+  /**
+  * returns the serialize trie
+  */
+  public serialize(): Buffer {
+    if(!this.defaultConfig)
+      throw new Error("serialize is supported only for default config")
+
+    return rlp.encode([this.root, this.db.getAllEntries()])
+  }
+
+  /**
+  * loads a serialized trie
+  */
+  public fromSerialized(serializedTree: Buffer) {
+
+    if(!this.defaultConfig)
+      throw new Error("fromSerialized is supported only for default config")
+
+    const deSerTree = rlp.decode(serializedTree)
+    const deSerRoot = deSerTree && deSerTree[0]
+    const deSerDB = deSerTree && deSerTree[1].map(entry => [entry[0].toString(), entry[1]])
+
+    if (!(deSerDB && deSerRoot))
+      return false
+
+    this.db = new MemoryDB(deSerDB)
+    this.root = deSerRoot
+
+    return true
   }
 
   /**

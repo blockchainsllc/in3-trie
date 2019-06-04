@@ -63,6 +63,12 @@ export async function populateTransactionTree(block: BlockData): Promise<in3_tri
   return trie
 }
 
+export function serdeTrie(trie: in3_trie) {
+  const reconstructedTrie = new in3_trie()
+  reconstructedTrie.fromSerialized(trie.serialize())
+  return reconstructedTrie
+}
+
 export async function populateReceiptTree(block: NewBlockData): Promise<in3_trie>{
 
   const trie = new in3_trie()
