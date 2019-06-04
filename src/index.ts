@@ -15,7 +15,7 @@ export type NodeKey = Hash | Buffer[]
 export type Hasher = (data:Buffer)=>Buffer
 export interface Codec {
   encode(data:Buffer[]):Buffer
-  decode(data:Buffer):Buffer[]
+  decode(data:Buffer):Buffer[] | Buffer | any
 }
 
 export type Nibbles = number[]
@@ -172,7 +172,11 @@ export default class Trie {
       }
     }
     debugger
-    return handleNode( await this.getNode(this.root), toNibbles(key))
+
+    const rootNode = await this.getNode(this.root)
+    if (!rootNode) throw new Error("The tree is empty")
+
+    return handleNode( rootNode, toNibbles(key))
   }
 
   /**
@@ -211,8 +215,8 @@ export default class Trie {
       throw new Error("fromSerialized is supported only for default config")
 
     const deSerTree = rlp.decode(serializedTree)
-    const deSerRoot = deSerTree && deSerTree[0]
-    const deSerDB = deSerTree && deSerTree[1].map(entry => [entry[0].toString(), entry[1]])
+    const deSerRoot = deSerTree && (deSerTree[0] as any)
+    const deSerDB = deSerTree && (deSerTree[1] as any).map(entry => [entry[0].toString(), entry[1]])
 
     if (!(deSerDB && deSerRoot))
       return false

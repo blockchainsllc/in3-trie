@@ -67,7 +67,8 @@
       ["0xf735071cbee190d76b704ce68384fc21e389fbe7", null]
     ],
     "root": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
-    "secure": true
+    "secure": true,
+    "empty": true
   },
   "jeff": {
     "in": [
