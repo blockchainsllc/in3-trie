@@ -172,7 +172,11 @@ export default class Trie {
       }
     }
     debugger
-    return handleNode( await this.getNode(this.root), toNibbles(key))
+
+    const rootNode = await this.getNode(this.root)
+    if (!rootNode) throw new Error("The tree is empty")
+
+    return handleNode( rootNode, toNibbles(key))
   }
 
   /**

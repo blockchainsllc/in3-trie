@@ -29,10 +29,13 @@ describe('JSON-Tests', () => {
             const trie = await populateTree(test[testcase])
             const reconstructedTrie = serdeTrie(trie)
             const secure = test[testcase].secure?true:false
+            const empty = test[testcase].empty?true:false
 
-            for( const key of Object.keys(test[testcase].in)) {
-              const proofIndex = secure?keccak256(key):toBuffer(key)
-              assert.deepEqual((await trie.getProof(proofIndex)), (await reconstructedTrie.getProof(proofIndex)))
+            if(!empty) {
+              for( const key of Object.keys(test[testcase].in)) {
+                const proofIndex = secure?keccak256(key):toBuffer(key)
+                assert.deepEqual((await trie.getProof(proofIndex)), (await reconstructedTrie.getProof(proofIndex)))
+              }
             }
           })
         })
