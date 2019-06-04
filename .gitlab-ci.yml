@@ -20,7 +20,6 @@ build:
   script:
     - sh /prepare.sh
     - npm install
-    - npm install in3
     - npm run build
   artifacts:
     paths:
@@ -33,7 +32,6 @@ test-trie:
   script:
     - sh /prepare.sh
     - npm install
-    - npm install in3
     - npm test
 
 deploy-to-slockit-npm:
